@@ -65,9 +65,12 @@ static double expression(String[] exp)
         
         for (int i = 0; i<exp.length; ++i)
         {
-            if (isDigit(exp[i]))
+            if (isDigit(exp[i])){
+            	if(i > 0 && isDigit(exp[i-1])){
+            		throw new LookAtMrAlgebraOverHereException();
+            	}
             	postfix.add(exp[i]);
-
+            }
             else if (isOperator(exp[i])){
             	if(exp[i].equals("("))
             		opera.push(exp[i]);
@@ -76,12 +79,14 @@ static double expression(String[] exp)
                     	postfix.add(opera.pop());
                      
                     if (!opera.isEmpty() && !opera.peek() .equals("("))
-                        throw new IllegalOperationException();                
+                        throw new LookAtMrAlgebraOverHereException();                
                     else
                         opera.pop();
             	}
                 else
                 {
+                	if(i > 0 && isOperator(exp[i-1]) && !exp[i-1].equals(")"))
+                		throw new LookAtMrAlgebraOverHereException();
                     while (!opera.isEmpty() && Prec(exp[i]) <= Prec(opera.peek()))
                     	postfix.add(opera.pop());
                     opera.push(exp[i]);
@@ -92,6 +97,9 @@ static double expression(String[] exp)
       
         while (!opera.isEmpty())
         	postfix.add(opera.pop());
+        
+        if(postfix.isEmpty())
+        	throw new UserIsADumbassException();
 
         return evaluate(postfix);
 }
@@ -113,40 +121,41 @@ public static double evaluate(ArrayList<String> postfix){
 
 public static void main(String[] args) {
 try{
-	for(String s : args){
-		System.out.println(s);
-	}
     System.out.println(expression(args));	
 }
 catch(LookAtMrAlgebraOverHereException e){
-	System.out.println("Wrong expression!");
+	System.out.println(e);
 	System.exit(1);
 }
 catch(IllegalOperationException e){
-	System.out.println("Wrong operator!");
+	System.out.println(e);
 	System.exit(1);
 }
 catch(UserIsADumbassException e){
-	System.out.println("Error!");
+	System.out.println(e);
 	System.exit(1);
 }
 catch(ArithmeticException e){
-	System.out.println("CANNOT DIVIDED BY 0");
+	System.out.println("CANNOT DIVIDED BY ZERO");
 	System.exit(1);
 }
 }
 
 }
 class LookAtMrAlgebraOverHereException extends IllegalArgumentException{
-
+	public String toString(){
+		return new String("Error! Wrong expression! Example ( 3 + 1 ) * 8");
+	}
 }
 
 class IllegalOperationException extends IllegalArgumentException{
-
+	public String toString(){
+		return new String("Error! Unsupprted operator!");
+	}
 }
 
 class UserIsADumbassException extends IllegalArgumentException{
-
+	public String toString(){
+		return new String("Error! Empty/illegal expression.");
+	}
 }
-
-
